@@ -7,7 +7,7 @@ from datetime import date, datetime
 
 # TODO: Validar cada linha se inicia com um número (isso é uma linha válida!)
 
-CAMPOS =[
+CAMPOS = [
     "id",
     "ano_acao_fiscal",
     "uf",
@@ -20,7 +20,10 @@ CAMPOS =[
     "data_inclusao_cadastro",
 ]
 
+
 class Registro(BaseModel):
+    """Cria um Registro de empresa no cadastro de trabalho escravo"""
+
     id: int
     ano_acao_fiscal: int
     uf: str
@@ -30,29 +33,28 @@ class Registro(BaseModel):
     trabalhadores_envolvidos: int
     cnae: str
     data_decisao_administrativa: date
-    data_inclusao_cadastro: date
+    data_inclusao_cadastro: str
     data_da_carga: date = date.today()
 
     @validator("data_decisao_administrativa", pre=True)
     def parse_data_decisao_administrativa(cls, value):
-        return datetime.strptime(
-            value,
-            "%d/%m/%Y"
-        ).date()
+        return datetime.strptime(value, "%d/%m/%Y").date()
 
-    @validator("data_inclusao_cadastro", pre=True)
-    def parse_data_inclusao_cadastro(cls, value):
-        return datetime.strptime(
-            value,
-            "%d/%m/%Y"
-        ).date()
+    # @validator("data_inclusao_cadastro", pre=True)
+    # def parse_data_inclusao_cadastro(cls, value):
+    #     return datetime.strptime(
+    #         value,
+    #         "%d/%m/%Y"
+    #     ).date()
 
 
 def leitura_arquivo():
-    """ Verifica se existe um arquivo não processado na
-        pasta arquivos e faz a leitura
+    """Verifica se existe um arquivo não processado na
+    pasta arquivos e faz a leitura
     """
-    with open("./arquivos/cadastro_de_empregadores-atualizacao-extraord-09-mar-2023.txt", "r") as f:
+    with open(
+        "./arquivos/cadastro_de_empregadores-atualizacao-extraord-09-mar-2023.txt", "r"
+    ) as f:
         return f.readlines()
 
 
@@ -61,11 +63,7 @@ def limpar_registro(linha: str) -> list[str]:
 
 
 def empacota_registro(linha: list) -> dict:
-    itens = zip(CAMPOS, linha)
-    d = {}
-    for c, v in itens:
-        d[c] = v
-    return d
+    return dict(zip(CAMPOS, linha))
 
 
 def registrar_empregadores(arquivo: list) -> list[Registro]:
@@ -83,9 +81,15 @@ def registrar_empregadores(arquivo: list) -> list[Registro]:
 
 
 def main():
+    # Lê o arquivo
     arquivo = leitura_arquivo()
+
+    # TODO: Exclui as linhas do arquivo que não são registros
+
+    # Transforma a lista de linhas do arquivo em uma lista de objetos Registro
     lista_empregadores = registrar_empregadores(arquivo=arquivo)
-    print(len(lista_empregadores))
+
+    # TODO: Salva a lista em um formato que possa ser importado pelo banco de dados.
 
 
 if __name__ == "__main__":
